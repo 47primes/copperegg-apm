@@ -1,0 +1,45 @@
+#!/usr/bin/env ruby
+
+begin
+  require 'copperegg-apm'
+rescue LoadError
+  require 'rubygems'
+  require 'copperegg-apm'
+end
+
+require 'optparse'
+require 'erb'
+
+template = File.read File.join(File.dirname(__FILE__), '../lib/generators/copperegg/apm/templates/config.rb')
+
+options = OptionParser.new do |opts|
+  opts.banner = "Usage: #{File.basename(__FILE__)}"
+
+  opts.on("-h") do
+    puts opts.banner
+  end
+end.parse!
+
+template_path = if File.exists?(File.join(Dir.pwd, "config", "initializers"))
+                  File.join(Dir.pwd, "config", "initializers", "copperegg_apm_config.rb")
+                else
+                  File.join(Dir.pwd, "copperegg_apm_config.rb")
+                end
+
+if File.exists?(template_path)
+  print "Override existing file #{template_path}? (Y/n): "
+  if gets =~ /n/i
+    puts "Configuration file creation abandoned."
+    exit
+  end
+end
+
+print "Enter your instrument key: "
+
+instrument_key = gets.strip
+
+File.open(template_path, File::WRONLY|File::CREAT|File::TRUNC) do |file|
+  file.write "require 'copperegg-apm'\n" + ERB.new(template).result(binding)
+end
+
+puts "Configuration file written to #{template_path}."

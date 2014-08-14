@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+
+begin
+  require 'copperegg-apm'
+rescue LoadError
+  require 'rubygems'
+  require 'copperegg-apm'
+end
+
+require File.join(File.dirname(__FILE__), '../lib/copperegg/apm/benchmark_methods_table')
+
+usage = "Usage: #{File.basename(__FILE__)} /path/to/startup_file"
+
+if ARGV[0].to_s.empty?
+  puts usage
+  exit
+elsif ARGV[0].strip == "-h" || ARGV[0].strip == "--help"
+  puts usage
+  exit
+elsif File.exists?(ARGV[0])
+  require ARGV[0]
+else
+  puts "No startup file found at #{ARGV[0]}. #{usage}"
+  exit
+end
+
+CopperEgg::APM::BenchmarkMethodsTable.new.print_table
