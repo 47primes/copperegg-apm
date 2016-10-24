@@ -1,15 +1,17 @@
 module CopperEgg
   module APM
     module Kernel
-      alias_method :raise_without_ce_instrumentation, :raise
+      alias raise_without_ce_instrumentation raise
 
       def raise(*args)
         super(ArgumentError, "wrong number of arguments", caller) if args.size > 3
-        CopperEgg::APM.capture_exception(*args) if CopperEgg::APM::Configuration.benchmark_exceptions?
+        if CopperEgg::APM::Configuration.benchmark_exceptions?
+          CopperEgg::APM.capture_exception(*args)
+        end
         raise_without_ce_instrumentation(*args)
       end
-      
-      alias_method :fail, :raise
+
+      alias fail raise
     end
   end
 end

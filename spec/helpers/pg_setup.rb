@@ -35,9 +35,9 @@ insert_sql = <<-SQL
 SQL
 
 10.times do |i|
-  insert_sql.push("  ('#{Faker::Internet.user_name}', '#{Faker::Internet.email}', \
+  insert_sql << "  ('#{Faker::Internet.user_name}', '#{Faker::Internet.email}', \
     '#{Faker::Lorem.characters(16)}', '#{Faker::Lorem.paragraph(2)}', \
-    CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)#{',' if i < 9}\n")
+    CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)#{',' if i < 9}\n"
 end
 
 connection.exec insert_sql

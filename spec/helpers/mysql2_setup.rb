@@ -1,14 +1,14 @@
 begin
-  require 'mysql2'
-  require 'faker'
+  require "mysql2"
+  require "faker"
 rescue LoadError
-  require 'rubygems'
-  require 'mysql2'
-  require 'faker'
+  require "rubygems"
+  require "mysql2"
+  require "faker"
 end
 
 begin
-  client = Mysql2::Client.new :host => "localhost", :username => ENV["MYSQL_USER"]
+  client = Mysql2::Client.new host: "localhost", username: ENV["MYSQL_USER"]
 
   create_db_sql = <<-SQL
     CREATE DATABASE IF NOT EXISTS copperegg_apm_test
@@ -42,10 +42,13 @@ begin
   SQL
 
   10.times do |i|
-    insert_sql << "  ('#{Faker::Internet.user_name}', '#{Faker::Internet.email}', '#{Faker::Lorem.characters(16)}', '#{Faker::Lorem.paragraph(2)}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)#{"," if i < 9}\n"
+    insert_sql << "  ('#{Faker::Internet.user_name}', '#{Faker::Internet.email}', \
+      '#{Faker::Lorem.characters(16)}', '#{Faker::Lorem.paragraph(2)}', \
+      CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)#{',' if i < 9}\n"
   end
 
   client.query insert_sql
-rescue Exception => e
-  puts "Could not create database copperegg_apm_test using user set in ENV['MYSQL_USER']. #{e.message}."
+rescue => e
+  puts "Could not create database copperegg_apm_test using user set in ENV['MYSQL_USER']. \
+    #{e.message}."
 end

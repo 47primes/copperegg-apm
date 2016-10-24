@@ -9,8 +9,8 @@ module CopperEgg
 
           return result if args.first =~ /\A\s*(begin|commit|rollback|set)/i
 
-          CopperEgg::APM.send_payload(:sql => CopperEgg::APM.obfuscate_sql(args.first), :time => time)
-            
+          CopperEgg::APM.send_payload(sql: CopperEgg::APM.obfuscate_sql(args.first), time: time)
+
           result
         else
           query_without_ce_instrumentation(*args)
@@ -21,11 +21,9 @@ module CopperEgg
 end
 
 if defined?(::Mysql)
-
   class Mysql
     include CopperEgg::APM::Mysql
-    alias_method :query_without_ce_instrumentation, :query
-    alias_method :query, :query_with_ce_instrumentation
+    alias query_without_ce_instrumentation query
+    alias query query_with_ce_instrumentation
   end
-
 end

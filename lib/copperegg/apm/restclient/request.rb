@@ -8,26 +8,26 @@ module CopperEgg
             result = execute_without_ce_instrumentation(&block)
             time = (Time.now.to_f * 1000.0).to_i - starttime
 
-            CopperEgg::APM.send_payload(:url => url.gsub(/\/\/[^:]+:[^@]@/,"//").gsub(/\?.*/,""), :time => time)
-              
+            CopperEgg::APM.send_payload(
+              url: url.gsub(%r{//[^:]+:[^@]@}, "//").gsub(/\?.*/, ""), time: time
+            )
+
             result
           else
             execute_without_ce_instrumentation(&block)
           end
-        end        
+        end
       end
     end
   end
 end
 
 if defined?(::RestClient::Request)
-
   module RestClient
     class Request
       include CopperEgg::APM::RestClient::Request
-      alias_method :execute_without_ce_instrumentation, :execute
-      alias_method :execute, :execute_with_ce_instrumentation
+      alias execute_without_ce_instrumentation execute
+      alias execute execute_with_ce_instrumentation
     end
   end
-
 end

@@ -2,12 +2,12 @@ module CopperEgg
   module APM
     module Rum
       def real_user_monitoring_javascript_tag
-        script = %Q(
+        script = %(
         <script type="text/javascript">
         var BACON = BACON || {};
 
         BACON.id = '#{CopperEgg::APM::Configuration.instrument_key}';
-        BACON.short_url = #{CopperEgg::APM::Configuration.rum_short_url};
+        BACON.short_url = '#{CopperEgg::APM::Configuration.rum_short_url}';
         BACON.beaconUrl = '#{CopperEgg::APM::Configuration.rum_beacon_url}';
 
         BACON.starttime = new Date().getTime();

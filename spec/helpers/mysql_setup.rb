@@ -1,5 +1,5 @@
-require 'mysql'
-require 'faker'
+require "mysql"
+require "faker"
 
 begin
   connection = Mysql.new("localhost", ENV["MYSQL_USER"])
@@ -8,7 +8,7 @@ begin
     CREATE DATABASE IF NOT EXISTS copperegg_apm_test
     DEFAULT CHARACTER SET = utf8
   SQL
-  
+
   connection.query create_db_sql
   connection.query "GRANT ALL PRIVILEGES ON copperegg_apm_test.* TO '%'@'%'"
   connection.query "USE copperegg_apm_test"
@@ -36,10 +36,13 @@ begin
   SQL
 
   10.times do |i|
-    insert_sql << "  ('#{Faker::Internet.user_name}', '#{Faker::Internet.email}', '#{Faker::Lorem.characters(16)}', '#{Faker::Lorem.paragraph(2)}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)#{"," if i < 9}\n"
+    insert_sql << "  ('#{Faker::Internet.user_name}', '#{Faker::Internet.email}', \
+      '#{Faker::Lorem.characters(16)}', '#{Faker::Lorem.paragraph(2)}', \
+      CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)#{',' if i < 9}\n"
   end
 
   connection.query insert_sql
 rescue Mysql::Error => e
-  puts "Could not create database copperegg_apm_test using user set in ENV['MYSQL_USER']. #{e.message}."
+  puts "Could not create database copperegg_apm_test using user set in ENV['MYSQL_USER']. \
+    #{e.message}."
 end
