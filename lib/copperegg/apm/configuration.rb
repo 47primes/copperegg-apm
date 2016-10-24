@@ -153,7 +153,7 @@ module CopperEgg
         create_logfile
       end
 
-      def self.disabled
+      def self.disabled?
         @disabled ||= false
       end
 
@@ -164,24 +164,24 @@ module CopperEgg
       def self.configure(&block)
         yield(self)
 
-        if @app_root.empty?
-          @app_root = if defined?(::Rails) && ::Rails.respond_to?(:configuration)
-                        ::Rails.configuration.root.to_s
-                      else
-                        File.dirname(caller[1])
-                      end
+        if app_root.empty?
+          self.app_root = if defined?(::Rails) && ::Rails.respond_to?(:configuration)
+                            ::Rails.configuration.root.to_s
+                          else
+                            File.dirname(caller[1])
+                          end
         end
 
-        if @disabled
-          @benchmark_sql = false
-          @benchmark_active_record = false
-          @benchmark_http = false
-          @benchmark_exceptions = false
-          @benchmark_methods_level   = :disabled
-          @only_methods              = []
-          @exclude_methods           = []
-          @include_methods           = []
-        elsif @benchmark_methods_level != :disabled
+        if disabled?
+          self.benchmark_sql = false
+          self.benchmark_active_record = false
+          self.benchmark_http = false
+          self.benchmark_exceptions = false
+          self.benchmark_methods_level   = :disabled
+          self.only_methods              = []
+          self.exclude_methods           = []
+          self.include_methods           = []
+        elsif benchmark_methods_level != :disabled
           CopperEgg::APM.add_method_benchmarking
         end
       end
