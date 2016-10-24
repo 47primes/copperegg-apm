@@ -6,9 +6,9 @@ module CopperEgg
           helper CopperEgg::APM::Rum
         end
       end
-      
+
       rake_tasks do
-        load 'copperegg/apm/tasks.rb'
+        load "copperegg/apm/tasks.rb"
       end
     end
   end

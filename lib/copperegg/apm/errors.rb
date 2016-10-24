@@ -1,6 +1,6 @@
 module CopperEgg
   module APM
-    class ConfigurationError < Exception; end
-    class PayloadError < Exception; end
+    class ConfigurationError < RuntimeError; end
+    class PayloadError < RuntimeError; end
   end
 end

@@ -2,6 +2,7 @@ at_exit do
   begin
     CopperEgg::APM.send_payload_cache
   rescue
+    nil
   end
 end
 
@@ -13,9 +14,9 @@ end
   ethon/easy/operations
   kernel
   mysql
-  mysql2/client 
+  mysql2/client
   net/http
-  pg/connection 
+  pg/connection
   restclient/request
   rum
   sqlite3/database
@@ -24,4 +25,4 @@ end
   version
 ).each { |file| require "copperegg/apm/#{file}" }
 
-require 'copperegg/apm/engine' if defined?(::Rails::Engine)
+require "copperegg/apm/engine" if defined?(::Rails::Engine)

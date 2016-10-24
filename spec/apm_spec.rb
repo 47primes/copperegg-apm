@@ -1,5 +1,5 @@
 # -*- encoding : utf-8 -*-
-require 'spec_helper'
+require "spec_helper"
 
 class Foo
   def self.bar
@@ -24,7 +24,7 @@ end
 describe CopperEgg::APM do
   describe ".configure" do
     it "should send a payload with version and configuration settings" do
-      Socket.any_instance.should_receive(:send) do |payload_cache, flag|
+      Socket.any_instance.should_receive(:send) do |payload_cache, _|
         hash = JSON.parse(payload_cache)
         expect(hash["version"]).to eq CopperEgg::APM::GEM_VERSION
         expect(hash["id"]).to match(/\A[0-1a-z]{16}\z/i)
@@ -33,7 +33,7 @@ describe CopperEgg::APM do
         expect(hash["exceptions"]).to eq true
         expect(hash["methods"]).to eq "disabled"
       end
-      CopperEgg::APM.configure {|config|}
+      CopperEgg::APM.configure { |config| }
     end
   end
 
@@ -104,8 +104,10 @@ describe CopperEgg::APM do
       /home/copperegg/.rvm/gems/ruby-1.9.2-p290@gems/delayed_job-3.0.5/lib/delayed/command.rb:81:in `daemonize'
       script/delayed_job:5:in `'
       LINES
-    
-      expect(CopperEgg::APM.trim_stacktrace(stacktrace.split("\n"))).to eq [stacktrace.lines.to_a.last.strip]
+
+      expect(CopperEgg::APM.trim_stacktrace(stacktrace.split("\n"))).to(
+        eq [stacktrace.lines.to_a.last.strip]
+      )
     end
 
     it "should only include lines in app root" do
@@ -267,12 +269,14 @@ describe CopperEgg::APM do
     it "should measure class method execution time" do
       expect(Foo.bar).to eq 4950
 
-      last_payload = CopperEgg::APM.send(:class_variable_get, :@@payload_cache).split("\x00").select {|i| i.size > 2}.map {|i| i.sub(/^[^\{]+/,'')}.last
+      last_payload = CopperEgg::APM.send(:class_variable_get, :@@payload_cache)
+                                   .split("\x00").select { |i| i.size > 2 }
+                                   .map { |i| i.sub(/^[^\{]+/, "") }.last
       hash = JSON.parse last_payload
-      
-      expect(hash.keys.sort).to eq ["id", "inst"]
+
+      expect(hash.keys.sort).to eq %w(id inst)
       expect(hash["id"]).to match(/\A[0-1a-z]{16}\z/i)
-      expect(hash["inst"].keys.sort).to eq ["method", "time"]
+      expect(hash["inst"].keys.sort).to eq %w(method time)
       expect(hash["inst"]["method"]).to eq "Foo.bar {Ruby}"
       expect(hash["inst"]["time"].to_s).to match(/\A\d+\Z/)
     end
@@ -280,12 +284,14 @@ describe CopperEgg::APM do
     it "should measure instance method execution time" do
       expect(Foo.new.bar).to eq 4950
 
-      last_payload = CopperEgg::APM.send(:class_variable_get, :@@payload_cache).split("\x00").select {|i| i.size > 2}.map {|i| i.sub(/^[^\{]+/,'')}.last
+      last_payload = CopperEgg::APM.send(:class_variable_get, :@@payload_cache)
+                                   .split("\x00").select { |i| i.size > 2 }
+                                   .map { |i| i.sub(/^[^\{]+/, "") }.last
       hash = JSON.parse last_payload
-      
-      expect(hash.keys.sort).to eq ["id", "inst"]
+
+      expect(hash.keys.sort).to eq %w(id inst)
       expect(hash["id"]).to match(/\A[0-1a-z]{16}\z/i)
-      expect(hash["inst"].keys.sort).to eq ["method", "time"]
+      expect(hash["inst"].keys.sort).to eq %w(method time)
       expect(hash["inst"]["method"]).to eq "Foo#bar {Ruby}"
       expect(hash["inst"]["time"].to_s).to match(/\A\d+\Z/)
     end
@@ -293,12 +299,14 @@ describe CopperEgg::APM do
     it "should measure module method execution time" do
       expect(Baz.bar).to eq 4950
 
-      last_payload = CopperEgg::APM.send(:class_variable_get, :@@payload_cache).split("\x00").select {|i| i.size > 2}.map {|i| i.sub(/^[^\{]+/,'')}.last
+      last_payload = CopperEgg::APM.send(:class_variable_get, :@@payload_cache)
+                                   .split("\x00").select { |i| i.size > 2 }
+                                   .map { |i| i.sub(/^[^\{]+/, "") }.last
       hash = JSON.parse last_payload
-      
-      expect(hash.keys.sort).to eq ["id", "inst"]
+
+      expect(hash.keys.sort).to eq %w(id inst)
       expect(hash["id"]).to match(/\A[0-1a-z]{16}\z/i)
-      expect(hash["inst"].keys.sort).to eq ["method", "time"]
+      expect(hash["inst"].keys.sort).to eq %w(method time)
       expect(hash["inst"]["method"]).to eq "Baz.bar {Ruby}"
       expect(hash["inst"]["time"].to_s).to match(/\A\d+\Z/)
     end
@@ -306,12 +314,14 @@ describe CopperEgg::APM do
     it "should not label the method based on the argument passed" do
       expect(Foo.new.baz).to eq 4950
 
-      last_payload = CopperEgg::APM.send(:class_variable_get, :@@payload_cache).split("\x00").select {|i| i.size > 2}.map {|i| i.sub(/^[^\{]+/,'')}.last
+      last_payload = CopperEgg::APM.send(:class_variable_get, :@@payload_cache)
+                                   .split("\x00").select { |i| i.size > 2 }
+                                   .map { |i| i.sub(/^[^\{]+/, "") }.last
       hash = JSON.parse last_payload
-      
-      expect(hash.keys.sort).to eq ["id", "inst"]
+
+      expect(hash.keys.sort).to eq %w(id inst)
       expect(hash["id"]).to match(/\A[0-1a-z]{16}\z/i)
-      expect(hash["inst"].keys.sort).to eq ["method", "time"]
+      expect(hash["inst"].keys.sort).to eq %w(method time)
       expect(hash["inst"]["method"]).to eq "NilClass#baz {Ruby}"
       expect(hash["inst"]["time"].to_s).to match(/\A\d+\Z/)
     end
@@ -319,21 +329,30 @@ describe CopperEgg::APM do
 
   describe ".obfuscate_sql" do
     it "shoudl obfuscate select statement" do
-      sql = "SELECT `annotations`.* FROM `annotations` WHERE (`annotations`.id = 2) AND (updated_at > '#{Time.now.strftime('%Y-%m-%d %H:%M%S')}')"
+      sql = "SELECT `annotations`.* FROM `annotations` WHERE (`annotations`.id = 2) \
+        AND (updated_at > '#{Time.now.strftime('%Y-%m-%d %H:%M%S')}')"
 
-      expect(CopperEgg::APM.obfuscate_sql(sql)).to eq "SELECT annotations.* FROM annotations WHERE (annotations.id = ?) AND (updated_at > ?)"
+      expect(CopperEgg::APM.obfuscate_sql(sql)).to(
+        eq "SELECT annotations.* FROM annotations WHERE (annotations.id = ?) AND (updated_at > ?)"
+      )
     end
 
     it "should obfuscate items in a list" do
-      sql = 'SELECT COUNT(`items`.`id`) FROM `items` WHERE (`items`.id = 2) AND (state in ("enabled","expired"))'
+      sql = 'SELECT COUNT(`items`.`id`) FROM `items` WHERE (`items`.id = 2) AND \
+        (state in ("enabled","expired"))'
 
-      expect(CopperEgg::APM.obfuscate_sql(sql)).to eq "SELECT COUNT(items.id) FROM items WHERE (items.id = ?) AND (state in (?,?))"
+      expect(CopperEgg::APM.obfuscate_sql(sql)).to(
+        eq "SELECT COUNT(items.id) FROM items WHERE (items.id = ?) AND (state in (?,?))"
+      )
     end
 
     it "should obfuscate update statement" do
-      sql = "UPDATE `users` SET `phone` = '512.777.9311', `updated_at` = '#{Time.now.strftime('%Y-%m-%d %H:%M%S')}' WHERE `users`.`id` = 1"
-      
-      expect(CopperEgg::APM.obfuscate_sql(sql)).to eq "UPDATE users SET phone = ?, updated_at = ? WHERE users.id = ?"
+      sql = "UPDATE `users` SET `phone` = '512.777.9311', `updated_at` = \
+        '#{Time.now.strftime('%Y-%m-%d %H:%M%S')}' WHERE `users`.`id` = 1"
+
+      expect(CopperEgg::APM.obfuscate_sql(sql)).to(
+        eq "UPDATE users SET phone = ?, updated_at = ? WHERE users.id = ?"
+      )
     end
 
     it "should obfuscate delete statement" do

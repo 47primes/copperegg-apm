@@ -1,19 +1,17 @@
-require 'pg'
-require 'faker'
+require "pg"
+require "faker"
 
 begin
-  connection = PG.connect(:dbname => 'copperegg_apm_test', :user => ENV["PG_USER"])
+  connection = PG.connect(dbname: "copperegg_apm_test", user: ENV["PG_USER"])
 rescue PG::Error => e
-  if e.message =~ /database "copperegg_apm_test" does not exist/
-    if ENV["PG_USER"]
-      `createdb -U #{ENV["PG_USER"]} -w copperegg_apm_test`
-    else
-      `createdb -w copperegg_apm_test`
-    end
-    connection = PG.connect(:dbname => 'copperegg_apm_test', :user => ENV["PG_USER"])
+  raise e unless e.message =~ /database "copperegg_apm_test" does not exist/
+
+  if ENV["PG_USER"]
+    `createdb -U #{ENV["PG_USER"]} -w copperegg_apm_test`
   else
-    raise e
+    `createdb -w copperegg_apm_test`
   end
+  connection = PG.connect(dbname: "copperegg_apm_test", user: ENV["PG_USER"])
 end
 
 create_table_sql = <<-SQL
@@ -37,7 +35,9 @@ insert_sql = <<-SQL
 SQL
 
 10.times do |i|
-  insert_sql << "  ('#{Faker::Internet.user_name}', '#{Faker::Internet.email}', '#{Faker::Lorem.characters(16)}', '#{Faker::Lorem.paragraph(2)}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)#{"," if i < 9}\n"
+  insert_sql.push("  ('#{Faker::Internet.user_name}', '#{Faker::Internet.email}', \
+    '#{Faker::Lorem.characters(16)}', '#{Faker::Lorem.paragraph(2)}', \
+    CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)#{',' if i < 9}\n")
 end
 
 connection.exec insert_sql

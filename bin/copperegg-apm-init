@@ -1,16 +1,18 @@
 #!/usr/bin/env ruby
 
 begin
-  require 'copperegg-apm'
+  require "copperegg-apm"
 rescue LoadError
-  require 'rubygems'
-  require 'copperegg-apm'
+  require "rubygems"
+  require "copperegg-apm"
 end
 
-require 'optparse'
-require 'erb'
+require "optparse"
+require "erb"
 
-template = File.read File.join(File.dirname(__FILE__), '../lib/generators/copperegg/apm/templates/config.rb')
+template = File.read(
+  File.join(File.dirname(__FILE__), "../lib/generators/copperegg/apm/templates/config.rb"
+)
 
 options = OptionParser.new do |opts|
   opts.banner = "Usage: #{File.basename(__FILE__)}"
@@ -20,7 +22,7 @@ options = OptionParser.new do |opts|
   end
 end.parse!
 
-template_path = if File.exists?(File.join(Dir.pwd, "config", "initializers"))
+template_path = if File.exist?(File.join(Dir.pwd, "config", "initializers"))
                   File.join(Dir.pwd, "config", "initializers", "copperegg_apm_config.rb")
                 else
                   File.join(Dir.pwd, "copperegg_apm_config.rb")
@@ -39,7 +41,7 @@ print "Enter your instrument key: "
 instrument_key = gets.strip
 
 File.open(template_path, File::WRONLY|File::CREAT|File::TRUNC) do |file|
-  file.write "require 'copperegg-apm'\n" + ERB.new(template).result(binding)
+  file.write "require "copperegg-apm"\n" + ERB.new(template).result(binding)
 end
 
 puts "Configuration file written to #{template_path}."

@@ -5,13 +5,13 @@ module CopperEgg
         module Operations
           def perform_with_ce_instrumentation
             if CopperEgg::APM::Configuration.benchmark_http?
-              x = url.gsub(/\/\/[^:]+:[^@]@/,"//").gsub(/\?.*/,"")
+              x = url.gsub(%r{//[^:]+:[^@]@}, "//").gsub(/\?.*/, "")
               starttime = (Time.now.to_f * 1000.0).to_i
               result = perform_without_ce_instrumentation
               time = (Time.now.to_f * 1000.0).to_i - starttime
 
-              CopperEgg::APM.send_payload(:url => x, :time => time)
-                
+              CopperEgg::APM.send_payload(url: x, time: time)
+
               result
             else
               perform_without_ce_instrumentation
@@ -29,8 +29,8 @@ if defined?(::Ethon::Easy::Operations)
     class Easy
       module Operations
         include CopperEgg::APM::Ethon::Easy::Operations
-        alias_method :perform_without_ce_instrumentation, :perform
-        alias_method :perform, :perform_with_ce_instrumentation
+        alias perform_without_ce_instrumentation perform
+        alias perform perform_with_ce_instrumentation
       end
     end
   end
