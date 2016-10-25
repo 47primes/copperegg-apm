@@ -137,9 +137,11 @@ module CopperEgg
 
       def self.log(payload)
         return if @@logger == nil
-        @@logger.debug "Payload sent at #{DateTime.strptime(Time.now.to_i.to_s, '%s').strftime('%Y-%m-%d %H:%M:%S')} #{payload.bytesize} bytes\n"
-        @@logger.debug payload.split("\x00").select {|i| i.size > 2}.map {|i| i.sub(/^[^\{]+/,'')}.join("\n")
-        @@logger.debug ""
+        Thread.start do
+          @@logger.debug "Payload sent at #{DateTime.strptime(Time.now.to_i.to_s, '%s').strftime('%Y-%m-%d %H:%M:%S')} #{payload.bytesize} bytes\n"
+          @@logger.debug payload.split("\x00").select {|i| i.size > 2}.map {|i| i.sub(/^[^\{]+/,'')}.join("\n")
+          @@logger.debug ""
+        end
       end
 
       def self.enable_logging(dir = '/tmp')
