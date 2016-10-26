@@ -80,12 +80,12 @@ module CopperEgg
 
       def self.benchmark_active_record=(boolean)
         raise ConfigurationError.new("Boolean expected for benchmark_active_record") if boolean != true && boolean != false
-        @@benchmark_sql = boolean
+        @@benchmark_active_record = boolean
       end
 
       def self.benchmark_active_record?
         @@benchmark_active_record
-      end      
+      end
 
       def self.benchmark_http=(boolean)
         raise ConfigurationError.new("Boolean expected for benchmark_http") if boolean != true && boolean != false
@@ -108,7 +108,7 @@ module CopperEgg
       def self.benchmark_methods(level, options={})
         raise ConfigurationError.new("Method benchmark level can only be :disabled, :basic, :moderate, :full, or :custom") if !BENCHMARK_METHOD_LEVELS.include?(level)
 
-        @@benchmark_methods_level = level        
+        @@benchmark_methods_level = level
         return if level == :disabled
 
         if level == :custom
