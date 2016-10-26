@@ -16,7 +16,7 @@ module CopperEgg
       @@gem_root                  = File.dirname(File.dirname(__FILE__))
       @@log_to                    = nil
       @@benchmark_sql             = true
-      @@benchmark_active_record   = false
+      @@benchmark_active_record   = true
       @@benchmark_http            = true
       @@benchmark_exceptions      = true
       @@benchmark_methods_level   = :disabled
