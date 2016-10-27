@@ -8,7 +8,7 @@ module CopperEgg
               sql, name = args
               starttime = Time.now
               result = block_given? ? log_without_ce_instrumentation(*args, &Proc.new) : log_without_ce_instrumentation(*args)
-              time = (Time.now - starttime)*1000
+              time = Time.now - starttime
 
               CopperEgg::APM.send_payload({:sql => CopperEgg::APM.obfuscate_sql(sql), :time => time})
 
