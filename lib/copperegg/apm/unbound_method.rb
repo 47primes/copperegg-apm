@@ -61,7 +61,7 @@ module CopperEgg
           def #{name}(*args)
             starttime = Time.now
             result = block_given? ? _cu_#{name}(*args,&Proc.new) : _cu_#{name}(*args)
-            time = (Time.now - starttime)*1000
+            time = Time.now - starttime
 
             CopperEgg::APM.send_payload({:method => "#{display_name}", :time => time})
 

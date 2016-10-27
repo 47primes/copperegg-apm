@@ -36,7 +36,7 @@ module CopperEgg
 
       starttime = Time.now
       result = yield
-      parameters[:time] = (Time.now - starttime)*1000
+      parameters[:time] = Time.now - starttime
 
       send_payload(parameters)
 

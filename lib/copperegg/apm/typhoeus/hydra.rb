@@ -6,7 +6,7 @@ module CopperEgg
           if CopperEgg::APM::Configuration.benchmark_http?
             starttime = Time.now
             result = handle_request_without_ce_instrumentation(request, response, live_request)
-            time = (Time.now.to_f - starttime)*1000
+            time = Time.now.to_f - starttime
 
             CopperEgg::APM.send_payload(:url => request.url.gsub(/\/\/[^:]+:[^@]@/,"//").gsub(/\?.*/,""), :time => time)
 

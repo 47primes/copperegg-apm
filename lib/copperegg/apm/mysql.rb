@@ -5,7 +5,7 @@ module CopperEgg
         if CopperEgg::APM::Configuration.benchmark_sql?
           starttime = Time.now
           result = query_without_ce_instrumentation(*args)
-          time = (Time.now - starttime)*1000
+          time = Time.now - starttime
 
           return result if args.first =~ /\A\s*(begin|commit|rollback|set)/i
 

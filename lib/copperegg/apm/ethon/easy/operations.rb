@@ -8,7 +8,7 @@ module CopperEgg
               x = url.gsub(/\/\/[^:]+:[^@]@/,"//").gsub(/\?.*/,"")
               starttime = Time.now
               result = perform_without_ce_instrumentation
-              time = (Time.now - starttime)*1000
+              time = Time.now - starttime
 
               CopperEgg::APM.send_payload(:url => x, :time => time)
 
