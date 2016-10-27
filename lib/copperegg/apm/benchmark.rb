@@ -103,7 +103,7 @@ module CopperEgg
       parameters[param_type] += " {Ruby}"
 
       key = parameters[:error] ? :excp : :inst
-      hash = {key => parameters, :id => CopperEgg::APM::Configuration.instrument_key}
+      hash = { key => parameters }
 
       json = hash.to_json
       payload = "#{[0x6375].pack("N")}#{[json.length].pack("N")}#{json}"
