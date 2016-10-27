@@ -24,7 +24,7 @@ module CopperEgg
                         }.to_json
       send_payload_cache
     end
-        
+
     def benchmark(arg, &block)
       if arg.class == Hash
         parameters = arg
@@ -34,12 +34,12 @@ module CopperEgg
         parameters = {:method => "#{arg.class}##{calling_method}"}
       end
 
-      starttime = (Time.now.to_f * 1000.0).to_i
+      starttime = Time.now
       result = yield
-      parameters[:time] = (Time.now.to_f * 1000.0).to_i - starttime
+      parameters[:time] = (Time.now - starttime)*1000
 
       send_payload(parameters)
-      
+
       result
     end
 
@@ -62,7 +62,7 @@ module CopperEgg
           $VERBOSE = v
         end
       end
-      
+
       ObjectSpace.each_object(Class) do |class_or_module|
         begin
           class_or_module.instance_methods(false).each do |name|
@@ -142,7 +142,7 @@ module CopperEgg
 
       # Remove escaping quotes
       sql.gsub!(/\\["']/, '')
-    
+
       # Remove surrounding backticks
       sql.gsub!(/[`]([^`]+)[`]/i,'\1')
 
@@ -204,7 +204,7 @@ module CopperEgg
 
     def capture_exception(*args)
       exception = if args.size == 0
-        $!.nil? ? RuntimeError.new : $!        
+        $!.nil? ? RuntimeError.new : $!
       elsif args.size == 1
         args.first.is_a?(String) ? RuntimeError.exception(args.first) : args.first.exception
       elsif args.size <= 3
