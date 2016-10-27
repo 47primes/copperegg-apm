@@ -59,12 +59,12 @@ module CopperEgg
           #{"class << self" if class_method?}
           alias_method "_cu_#{name}", "#{name}"
           def #{name}(*args)
-            starttime = (Time.now.to_f * 1000.0).to_i
+            starttime = Time.now
             result = block_given? ? _cu_#{name}(*args,&Proc.new) : _cu_#{name}(*args)
-            time = (Time.now.to_f * 1000.0).to_i - starttime
+            time = (Time.now - starttime)*1000
 
             CopperEgg::APM.send_payload({:method => "#{display_name}", :time => time})
-              
+
             result
           end
           #{"end" if class_method?}
@@ -96,7 +96,7 @@ module CopperEgg
         return false if CopperEgg::APM::Configuration.only_methods.include?(name)
         CopperEgg::APM::Configuration.only_methods.each do |value|
           return false if value =~ /::\Z/ && parent_class.to_s.include?(value)
-        end        
+        end
 
         if CopperEgg::APM::Configuration.only_methods.length > 0
           return true if !CopperEgg::APM::Configuration.only_methods.include?(parent_class.to_s) && !CopperEgg::APM::Configuration.only_methods.include?(display_name) && !CopperEgg::APM::Configuration.only_methods.include?(name)
@@ -114,12 +114,12 @@ module CopperEgg
         return false if CopperEgg::APM::Configuration.include_methods.include?(name)
         CopperEgg::APM::Configuration.include_methods.each do |value|
           return false if value =~ /::\Z/ && parent_class.to_s.include?(value) && !name_begins_with_underscore_or_ends_with_question_mark?
-        end        
+        end
 
         return true if name_begins_with_underscore_or_ends_with_question_mark?
 
         return false if benchmark_levels.include?(CopperEgg::APM::Configuration.benchmark_methods_level)
-        
+
         true
       end
     end

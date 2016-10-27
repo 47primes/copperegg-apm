@@ -4,17 +4,17 @@ module CopperEgg
       module Request
         def execute_with_ce_instrumentation(&block)
           if CopperEgg::APM::Configuration.benchmark_http?
-            starttime = (Time.now.to_f * 1000.0).to_i
+            starttime = Time.now
             result = execute_without_ce_instrumentation(&block)
-            time = (Time.now.to_f * 1000.0).to_i - starttime
+            time = (Time.now - starttime)*1000
 
             CopperEgg::APM.send_payload(:url => url.gsub(/\/\/[^:]+:[^@]@/,"//").gsub(/\?.*/,""), :time => time)
-              
+
             result
           else
             execute_without_ce_instrumentation(&block)
           end
-        end        
+        end
       end
     end
   end

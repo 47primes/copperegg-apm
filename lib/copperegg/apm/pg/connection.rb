@@ -4,14 +4,14 @@ module CopperEgg
       module Connection
         def exec_with_ce_instrumentation(*args)
           if CopperEgg::APM::Configuration.benchmark_sql?
-            starttime = (Time.now.to_f * 1000.0).to_i
+            starttime = Time.now
             result = block_given? ? exec_without_ce_instrumentation(*args, &Proc.new) : exec_without_ce_instrumentation(*args)
-            time = (Time.now.to_f * 1000.0).to_i - starttime
+            time = (Time.now - starttime)*1000
 
             return result if args.first =~ /\A\s*(begin|commit|rollback|set)/i
 
             CopperEgg::APM.send_payload(:sql => CopperEgg::APM.obfuscate_sql(args.first), :time => time)
-              
+
             result
           else
             block_given? ? exec_without_ce_instrumentation(*args, &Proc.new) : exec_without_ce_instrumentation(*args)

@@ -6,12 +6,12 @@ module CopperEgg
           def log_with_ce_instrumentation(*args)
             if CopperEgg::APM::Configuration.benchmark_active_record?
               sql, name = args
-              starttime = (Time.now.to_f * 1000.0).to_i
+              starttime = Time.now
               result = block_given? ? log_without_ce_instrumentation(*args, &Proc.new) : log_without_ce_instrumentation(*args)
-              time = (Time.now.to_f * 1000.0).to_i - starttime
+              time = (Time.now - starttime)*1000
 
               CopperEgg::APM.send_payload({:sql => CopperEgg::APM.obfuscate_sql(sql), :time => time})
-                
+
               result
             else
               block_given? ? log_without_ce_instrumentation(*args, &Proc.new) : log_without_ce_instrumentation(*args)

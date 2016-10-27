@@ -4,12 +4,12 @@ module CopperEgg
       module Hydra
         def handle_request_with_ce_instrumentation(request, response, live_request=true)
           if CopperEgg::APM::Configuration.benchmark_http?
-            starttime = (Time.now.to_f * 1000.0).to_i
+            starttime = Time.now
             result = handle_request_without_ce_instrumentation(request, response, live_request)
-            time = (Time.now.to_f * 1000.0).to_i - starttime
+            time = (Time.now.to_f - starttime)*1000
 
             CopperEgg::APM.send_payload(:url => request.url.gsub(/\/\/[^:]+:[^@]@/,"//").gsub(/\?.*/,""), :time => time)
-              
+
             result
           else
             handle_request_without_ce_instrumentation(request, response, live_request)
@@ -21,7 +21,7 @@ module CopperEgg
 end
 
 if defined?(::Typhoeus::Hydra) && defined?(::Typhoeus::VERSION) && ::Typhoeus::VERSION =~ /\A0\.3\.?/
-  
+
   module Typhoeus
     class Hydra
       include CopperEgg::APM::Typhoeus::Hydra
