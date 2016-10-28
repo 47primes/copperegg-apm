@@ -13,9 +13,9 @@ end
   ethon/easy/operations
   kernel
   mysql
-  mysql2/client 
+  mysql2/client
   net/http
-  pg/connection 
+  pg/connection
   restclient/request
   rum
   sqlite3/database

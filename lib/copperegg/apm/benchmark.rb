@@ -101,6 +101,7 @@ module CopperEgg
                     end
 
       parameters[param_type] += " {Ruby}"
+      parameters[:stacktrace] = trim_stacktrace(caller)
 
       key = parameters[:error] ? :excp : :inst
       hash = { key => parameters }
