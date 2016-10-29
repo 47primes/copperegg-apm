@@ -10,7 +10,11 @@ module CopperEgg
 
             return result if args.first =~ /\A\s*(begin|commit|rollback|set)/i
 
-            CopperEgg::APM.send_payload(:sql => CopperEgg::APM.obfuscate_sql(args.first), :time => time)
+            CopperEgg::APM.send_payload(
+              type: :sql,
+              value: CopperEgg::APM.obfuscate_sql(args.first),
+              time: time
+            )
 
             result
           else

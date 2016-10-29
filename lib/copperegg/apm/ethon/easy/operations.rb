@@ -10,7 +10,7 @@ module CopperEgg
               result = perform_without_ce_instrumentation
               time = Time.now - starttime
 
-              CopperEgg::APM.send_payload(:url => x, :time => time)
+              CopperEgg::APM.send_payload(type: :net, value: x, time: time)
 
               result
             else

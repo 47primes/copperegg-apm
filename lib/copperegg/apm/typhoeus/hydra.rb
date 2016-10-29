@@ -8,7 +8,11 @@ module CopperEgg
             result = handle_request_without_ce_instrumentation(request, response, live_request)
             time = Time.now.to_f - starttime
 
-            CopperEgg::APM.send_payload(:url => request.url.gsub(/\/\/[^:]+:[^@]@/,"//").gsub(/\?.*/,""), :time => time)
+            CopperEgg::APM.send_payload(
+              type: :net,
+              value: request.url.gsub(%r{//[^:]+:[^@]@}, "//").gsub(/\?.*/, ""),
+              time: time
+            )
 
             result
           else

@@ -15,13 +15,14 @@ module CopperEgg
 
     def configure(&block)
       Configuration.configure(&block)
-      @@payload_cache = { :version => GEM_VERSION,
-                          :id => Configuration.instrument_key,
-                          :sql => Configuration.benchmark_sql?,
-                          :http => Configuration.benchmark_http?,
-                          :exceptions => Configuration.benchmark_exceptions?,
-                          :methods => Configuration.benchmark_methods_level
-                        }.to_json
+      @@payload_cache = {
+        version: GEM_VERSION,
+        id: Configuration.instrument_key,
+        sql: Configuration.benchmark_sql?,
+        http: Configuration.benchmark_http?,
+        exceptions: Configuration.benchmark_exceptions?,
+        methods: Configuration.benchmark_methods_level
+      }.to_json
       send_payload_cache
     end
 
@@ -29,9 +30,9 @@ module CopperEgg
       if arg.class == Hash
         parameters = arg
       elsif arg.class == Class || arg.class == Module
-        parameters = {:method => "#{arg}.#{calling_method}"}
+        parameters = { type: :method, value: "#{arg}.#{calling_method}" }
       else
-        parameters = {:method => "#{arg.class}##{calling_method}"}
+        parameters = { type: :method, value: "#{arg.class}##{calling_method}" }
       end
 
       starttime = Time.now
@@ -46,7 +47,7 @@ module CopperEgg
     # Inject benchmarking code into user-defined public instance and class accessor methods whose names are made up of only alphanumeric characters.
     # By user-defined, we mean those whose source is defined in neither the load path nor the gem path.
     def add_method_benchmarking
-      benchmarkable_methods.each {|method| method.add_benchmarking unless method.excluded?}
+      benchmarkable_methods.each { |method| method.add_benchmarking unless method.excluded? }
     end
 
     # Returns an array of unbound methods to which benchmarking can be added.
@@ -56,8 +57,11 @@ module CopperEgg
       if defined?(::Rails) && Rails.respond_to?(:configuration)
         $LOAD_PATH.each do |path|
           v, $VERBOSE = $VERBOSE, nil
-          if path.include?(Rails.configuration.root.to_s) && DO_NOT_INCLUDE_PATHS.detect {|part| path.include?("/#{part}")}.nil?
-            Dir.glob("#{path}/**/*.rb").each {|f| ActiveSupport::Dependencies::Loadable.require_dependency f, ""}
+          if path.include?(Rails.configuration.root.to_s) &&
+            DO_NOT_INCLUDE_PATHS.detect { |part| path.include?("/#{part}") }.nil?
+            Dir.glob("#{path}/**/*.rb").each do
+              |f| ActiveSupport::Dependencies::Loadable.require_dependency f, ""
+            end
           end
           $VERBOSE = v
         end
@@ -90,23 +94,9 @@ module CopperEgg
     def send_payload(parameters)
       return if CopperEgg::APM::Configuration.instrument_key == nil
 
-      param_type =  if parameters.has_key?(:sql)
-                      :sql
-                    elsif parameters.has_key?(:method)
-                      :method
-                    elsif parameters.has_key?(:url)
-                      :url
-                    elsif parameters.has_key?(:error)
-                      :error
-                    end
-
-      parameters[param_type] += " {Ruby}"
       parameters[:stacktrace] = trim_stacktrace(caller)
 
-      key = parameters[:error] ? :excp : :inst
-      hash = { key => parameters }
-
-      json = hash.to_json
+      json = parameters.to_json
       payload = "#{[0x6375].pack("N")}#{[json.length].pack("N")}#{json}"
       if @@payload_cache.bytesize > PAYLOAD_BYTESIZE
         @@payload_cache = ""
@@ -142,26 +132,26 @@ module CopperEgg
       sql = sql.dup
 
       # Remove escaping quotes
-      sql.gsub!(/\\["']/, '')
+      sql.gsub!(/\\["']/, "")
 
       # Remove surrounding backticks
-      sql.gsub!(/[`]([^`]+)[`]/i,'\1')
+      sql.gsub!(/[`]([^`]+)[`]/i, '\1')
 
       # Remove surrounding quotes from strings immediately following "FROM"
-      sql.gsub!(/(from|into|update|set)\s*['"`]([^'"`]+)['"`]/i,'\1 \2')
+      sql.gsub!(/(from|into|update|set)\s*['"`]([^'"`]+)['"`]/i, '\1 \2')
 
       # Remove surrounding quotes from strings immediately neighboring a period
-      sql.gsub!(/([\.])['"]([^'"]+)['"]/,'\1\2')
-      sql.gsub!(/['"]([^'"]+)['"]([\.])/,'\1\2')
+      sql.gsub!(/([\.])['"]([^'"]+)['"]/, '\1\2')
+      sql.gsub!(/['"]([^'"]+)['"]([\.])/, '\1\2')
 
       # Replace other quoted strings with a question mark
-      sql.gsub!(/['"]([^'"]+)['"]/,'?')
+      sql.gsub!(/['"]([^'"]+)['"]/, "?")
 
       # Remove integers
-      sql.gsub!(/\b\d+\b/, '?')
+      sql.gsub!(/\b\d+\b/, "?")
 
       # Removing padded spaces
-      sql.gsub!(/(\s){2,}/,'\1')
+      sql.gsub!(/(\s){2,}/, '\1')
 
       # Remove leading and trailing whitespace
       sql.strip!
@@ -174,10 +164,13 @@ module CopperEgg
 
       last = array.last.strip
 
-      array.reject! {|path| path.include? CopperEgg::APM::Configuration.gem_root}
+      array.reject! { |path| path.include? CopperEgg::APM::Configuration.gem_root }
 
       if !CopperEgg::APM::Configuration.app_root.empty?
-        array.reject! {|path| !path.include?(CopperEgg::APM::Configuration.app_root) || !CopperEgg::APM::DO_NOT_INCLUDE_PATHS.detect {|part| path.include?("/#{part}")}.nil?}
+        array.reject! do |path|
+          !path.include?(CopperEgg::APM::Configuration.app_root) ||
+            !CopperEgg::APM::DO_NOT_INCLUDE_PATHS.detect { |part| path.include?("/#{part}")}.nil? }
+        end
       end
 
       array.map! do |path|
@@ -212,7 +205,12 @@ module CopperEgg
         args.first.exception(args[1])
       end
       stacktrace = trim_stacktrace(caller)
-      parameters = {:error => "#{exception.class}|#{stacktrace.first}", :stacktrace => "#{exception.message}\n#{stacktrace.join("\n")}", :ts => Time.now.to_i}
+      parameters = {
+        type: :error,
+        value: "#{exception.class}|#{stacktrace.first}",
+        stacktrace: "#{exception.message}\n#{stacktrace.join("\n")}",
+        time: Time.now.to_i
+      }
       send_payload(parameters)
     end
   end

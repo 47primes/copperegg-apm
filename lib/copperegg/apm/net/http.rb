@@ -9,7 +9,7 @@ module CopperEgg
             time = Time.now - starttime
             url = "http#{"s" if @use_ssl}://#{address}#{":#{port}" if port != ::Net::HTTP.default_port}#{req.path.sub(/\?.*/,"")}"
 
-            CopperEgg::APM.send_payload(:url => url, :time => time)
+            CopperEgg::APM.send_payload(type: :net, value: url, time: time)
 
             result
           else

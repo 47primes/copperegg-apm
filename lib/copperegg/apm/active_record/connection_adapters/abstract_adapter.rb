@@ -10,7 +10,11 @@ module CopperEgg
               result = block_given? ? log_without_ce_instrumentation(*args, &Proc.new) : log_without_ce_instrumentation(*args)
               time = Time.now - starttime
 
-              CopperEgg::APM.send_payload({:sql => CopperEgg::APM.obfuscate_sql(sql), :time => time})
+              CopperEgg::APM.send_payload(
+                type: :sql,
+                value: CopperEgg::APM.obfuscate_sql(sql),
+                time: time
+              )
 
               result
             else
