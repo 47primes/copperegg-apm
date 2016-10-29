@@ -169,7 +169,7 @@ module CopperEgg
       if !CopperEgg::APM::Configuration.app_root.empty?
         array.reject! do |path|
           !path.include?(CopperEgg::APM::Configuration.app_root) ||
-            !CopperEgg::APM::DO_NOT_INCLUDE_PATHS.detect { |part| path.include?("/#{part}")}.nil? }
+            !CopperEgg::APM::DO_NOT_INCLUDE_PATHS.detect { |part| path.include?("/#{part}") }.nil?
         end
       end
 
