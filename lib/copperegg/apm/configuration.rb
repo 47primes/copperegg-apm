@@ -191,7 +191,7 @@ module CopperEgg
           logdir = File.join(@@log_to, 'copperegg', 'apm')
           FileUtils.mkdir_p(logdir) unless File.directory?(logdir)
 
-          @@logger = Logger.new(File.join(logdir, "#{@@instrument_key}.log"), 0)
+          @@logger = Logger.new(File.join(logdir, "#{Rails.env}.log"), 0)
         end
       end
     end
