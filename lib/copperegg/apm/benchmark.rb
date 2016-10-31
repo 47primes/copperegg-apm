@@ -1,5 +1,6 @@
-require 'socket'
-require 'json'
+require "socket"
+require "json"
+require "benchmark"
 
 module CopperEgg
   module APM
@@ -35,9 +36,11 @@ module CopperEgg
         parameters = { type: :method, value: "#{arg.class}##{calling_method}" }
       end
 
-      starttime = Time.now
-      result = yield
-      parameters[:time] = Time.now - starttime
+      result = nil
+      time = Benchmark.realtime do
+        result = yield
+      end
+      parameters[:time] = time
 
       send_payload(parameters)
 

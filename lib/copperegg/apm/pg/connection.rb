@@ -4,9 +4,10 @@ module CopperEgg
       module Connection
         def exec_with_ce_instrumentation(*args)
           if CopperEgg::APM::Configuration.benchmark_sql?
-            starttime = Time.now
-            result = block_given? ? exec_without_ce_instrumentation(*args, &Proc.new) : exec_without_ce_instrumentation(*args)
-            time = Time.now - starttime
+            result = nil
+            time = Benchmark.realtime do
+              result = block_given? ? exec_without_ce_instrumentation(*args, &Proc.new) : exec_without_ce_instrumentation(*args)
+            end
 
             return result if args.first =~ /\A\s*(begin|commit|rollback|set)/i
 

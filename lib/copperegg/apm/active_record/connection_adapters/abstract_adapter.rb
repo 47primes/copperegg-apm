@@ -6,9 +6,10 @@ module CopperEgg
           def log_with_ce_instrumentation(*args)
             if CopperEgg::APM::Configuration.benchmark_active_record?
               sql, name = args
-              starttime = Time.now
-              result = block_given? ? log_without_ce_instrumentation(*args, &Proc.new) : log_without_ce_instrumentation(*args)
-              time = Time.now - starttime
+              result = nil
+              time = Benchmark.realtime do
+                result = block_given? ? log_without_ce_instrumentation(*args, &Proc.new) : log_without_ce_instrumentation(*args)
+              end
 
               CopperEgg::APM.send_payload(
                 type: :sql,

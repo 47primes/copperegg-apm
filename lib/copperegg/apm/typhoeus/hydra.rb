@@ -4,9 +4,10 @@ module CopperEgg
       module Hydra
         def handle_request_with_ce_instrumentation(request, response, live_request=true)
           if CopperEgg::APM::Configuration.benchmark_http?
-            starttime = Time.now
-            result = handle_request_without_ce_instrumentation(request, response, live_request)
-            time = Time.now.to_f - starttime
+            result = nil
+            time = Benchmark.realtime do
+              result = handle_request_without_ce_instrumentation(request, response, live_request)
+            end
 
             CopperEgg::APM.send_payload(
               type: :net,

@@ -4,9 +4,10 @@ module CopperEgg
       module Request
         def execute_with_ce_instrumentation(&block)
           if CopperEgg::APM::Configuration.benchmark_http?
-            starttime = Time.now
-            result = execute_without_ce_instrumentation(&block)
-            time = Time.now - starttime
+            result = nil
+            time = Benchmark.realtime do
+              result = execute_without_ce_instrumentation(&block)
+            end
 
             CopperEgg::APM.send_payload(
               type: :net,

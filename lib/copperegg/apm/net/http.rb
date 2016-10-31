@@ -4,9 +4,10 @@ module CopperEgg
       module HTTP
         def request_with_ce_instrumentation(req, body=nil, &block)
           if CopperEgg::APM::Configuration.benchmark_http?
-            starttime = Time.now
-            result = request_without_ce_instrumentation(req, body, &block)
-            time = Time.now - starttime
+            result = nil
+            time = Benchmark.realtime do
+              result = request_without_ce_instrumentation(req, body, &block)
+            end
             url = "http#{"s" if @use_ssl}://#{address}#{":#{port}" if port != ::Net::HTTP.default_port}#{req.path.sub(/\?.*/,"")}"
 
             CopperEgg::APM.send_payload(type: :net, value: url, time: time)
