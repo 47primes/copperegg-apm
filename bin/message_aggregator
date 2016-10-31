@@ -45,37 +45,38 @@ class EventAggregator
     SQL
   end
 
+  def self.find(params)
+    if params["type"] == "sql"
+      sql = "SELECT COUNT(id) FROM messages WHERE type = ? AND stacktrace = ?"
+      db.get_first_row sql, params["type"], params["stacktrace"]
+    else
+      sql = "SELECT COUNT(id) FROM messages WHERE type = ? AND stacktrace = ? AND value = ?"
+      db.get_first_row sql, params["type"], params["stacktrace"], params["value"]
+    end
+  end
+
   def self.insert_message(params)
-    unless exist?(message)
+    message = find(params)
+    unless message
       sql = <<-SQL
       INSERT INTO messages (type, stacktrace, value)
       VALUES (?, ?, ?)
       SQL
-      db.execute sql, params[:type], params[:stacktrace], params[:value]
+      message = db.execute(sql, params["type"], params["stacktrace"], params["value"])
     end
-    insert_message_count(params)
+    insert_message_count(message.first, params)
   end
 
-  def self.insert_message_count(params)
+  def self.insert_message_count(message_id, params)
     sql = <<-SQL
       INSERT INTO message_counts (message_id, time)
       VALUES (?, ?)
     SQL
-    db.execute sql, params[:message_id], params[:time]
-  end
-
-  def self.exist?(params)
-    if type == :sql
-      sql = "SELECT COUNT(id) FROM messages WHERE type = ? AND stacktrace = ?"
-      db.execute sql, params[:type], params[:stacktrace]
-    else
-      sql = "SELECT COUNT(id) FROM messages WHERE type = ? AND stacktrace = ? AND value = ?"
-      db.execute sql, params[:type], params[:stacktrace], params[:value]
-    end
+    db.execute sql, message_id, params[:time]
   end
 
   def self.run
-    fork do
+    loop do
       payload, host = udp_socket.recvfrom(PORT)
       payload = payload.split("\x00")
       payload = payload.select { |i| i.size > 2 }
@@ -84,6 +85,5 @@ class EventAggregator
       params = JSON(payload)
       insert_message(params)
     end
-    Process.waitall
   end
 end
